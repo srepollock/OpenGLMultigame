@@ -6,7 +6,7 @@
 //  Copyright © 2017 HankSpencer. All rights reserved.
 //
 
-#import "GameViewController.h"
+#import "PongViewController.h"
 #import <OpenGLES/ES2/glext.h>
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
@@ -75,7 +75,7 @@ GLfloat gCubeVertexData[216] =
     -0.5f, 0.5f, -0.5f,        0.0f, 0.0f, -1.0f
 };
 
-@interface GameViewController () {
+@interface PongViewController () {
     GLuint _program;
     
     GLKMatrix4 _modelViewProjectionMatrix;
@@ -97,7 +97,7 @@ GLfloat gCubeVertexData[216] =
 - (BOOL)validateProgram:(GLuint)prog;
 @end
 
-@implementation GameViewController
+@implementation PongViewController
 
 - (void)viewDidLoad
 {
