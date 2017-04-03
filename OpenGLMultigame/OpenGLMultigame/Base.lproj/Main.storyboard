@@ -9,10 +9,10 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Menu View Controller-->
+        <!--View Controller-->
         <scene sceneID="tXr-a1-R10">
             <objects>
-                <viewController id="BV1-FR-VrT" customClass="MenuViewController" sceneMemberID="viewController">
+                <viewController id="BV1-FR-VrT" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="8aa-yV-Osq"/>
                         <viewControllerLayoutGuide type="bottom" id="qHh-Mt-9TT"/>
@@ -108,12 +108,12 @@
         <!--Bullet Game-->
         <scene sceneID="U5F-uT-Z6i">
             <objects>
-                <viewController title="Bullet Game" id="S1b-bh-p0d" customClass="BulletViewController" sceneMemberID="viewController">
+                <viewController title="Bullet Game" id="S1b-bh-p0d" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="ECU-dd-aCB"/>
                         <viewControllerLayoutGuide type="bottom" id="kuP-Um-KFl"/>
                     </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="HW0-xL-8mK" customClass="GLKView">
+                    <view key="view" contentMode="scaleToFill" id="HW0-xL-8mK">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -127,12 +127,12 @@
         <!--Pong-->
         <scene sceneID="wRn-ip-d4G">
             <objects>
-                <viewController title="Pong" id="0Ok-a9-IuO" customClass="PongViewController" sceneMemberID="viewController">
+                <viewController title="Pong" id="0Ok-a9-IuO" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="lAu-Cx-osi"/>
                         <viewControllerLayoutGuide type="bottom" id="nyV-n2-9q4"/>
                     </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="Fck-tw-mA7" customClass="GLKView">
+                    <view key="view" contentMode="scaleToFill" id="Fck-tw-mA7">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
