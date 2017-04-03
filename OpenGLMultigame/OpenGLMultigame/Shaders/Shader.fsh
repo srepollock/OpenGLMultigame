@@ -1,9 +1,9 @@
 //
 //  Shader.fsh
-//  OpenGLMultigame
+//  MyGLGame
 //
-//  Created by Spencer Pollock on 2017-03-30.
-//  Copyright © 2017 HankSpencer. All rights reserved.
+//  Created by Borna Noureddin on 2015-01-28.
+//  Copyright (c) 2015 BCIT. All rights reserved.
 //
 
 varying lowp vec4 colorVarying;
