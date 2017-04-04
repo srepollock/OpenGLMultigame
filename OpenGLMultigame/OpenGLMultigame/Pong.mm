@@ -60,21 +60,17 @@ public:
             b2Body* bodyA = contact->GetFixtureA()->GetBody();
             Pong *parentObj = (__bridge Pong *)(bodyA->GetUserData());
             // Call RegisterHit (assume CBox2D object is in user data)
-            if (bodyA->GetPosition().x > BRICK_POS_X + 50) {
-                [parentObj RegisterHit2];
-
-            } else if (bodyA->GetPosition().x < BRICK_POS_X -50) {
-                [parentObj RegisterHit3];
-
-            } else {
-                [parentObj RegisterHit];
-            }
+            
+            
+            
             if (bodyA->GetPosition().y < 300) {
                 NSLog(@"Collision");
 //                if ((bodyA->GetPosition().x < PADDLE_POS_X + 50) && (bodyA->GetPosition().x > PADDLE_POS_X - 50)) {
 //                    // OK hit paddle
                     [parentObj PaddleHit];
 //                }
+            } else {
+                 [parentObj RegisterHit];
             }
         }
     }
@@ -135,10 +131,6 @@ public:
         brickBodyDef.type = b2_dynamicBody;
         brickBodyDef.position.Set(BRICK_POS_X, BRICK_POS_Y);
         theBrick = world->CreateBody(&brickBodyDef);
-        brickBodyDef2.position.Set(BRICK_POS_X + 150, BRICK_POS_Y);
-        theBrick2 = world->CreateBody(&brickBodyDef2);
-        brickBodyDef3.position.Set(BRICK_POS_X - 150, BRICK_POS_Y);
-        theBrick3 = world->CreateBody(&brickBodyDef3);
         paddleBodyDef.position.Set(BRICK_POS_X, BALL_POS_Y - 25	);
         thePaddle = world->CreateBody(&paddleBodyDef);
         if (theBrick)
@@ -154,32 +146,6 @@ public:
             fixtureDef.restitution = 1.0f;
             theBrick->CreateFixture(&fixtureDef);
             NSLog(@"Box 1");
-        }
-        if (theBrick2) {
-            theBrick2->SetUserData((__bridge void *)self);
-            theBrick2->SetAwake(false);
-            b2PolygonShape dynamicBox2;
-            dynamicBox2.SetAsBox(BRICK_WIDTH/2, BRICK_HEIGHT/2);
-            b2FixtureDef fixtureDef2;
-            fixtureDef2.shape = &dynamicBox2;
-            fixtureDef2.density = 1.0f;
-            fixtureDef2.friction = 0.3f;
-            fixtureDef2.restitution = 1.0f;
-            theBrick2->CreateFixture(&fixtureDef2);
-            NSLog(@"Box 2");
-        }
-        if (theBrick3) {
-            theBrick3->SetUserData((__bridge void *)self);
-            theBrick3->SetAwake(false);
-            b2PolygonShape dynamicBox3;
-            dynamicBox3.SetAsBox(BRICK_WIDTH/2, BRICK_HEIGHT/2);
-            b2FixtureDef fixtureDef3;
-            fixtureDef3.shape = &dynamicBox3;
-            fixtureDef3.density = 1.0f;
-            fixtureDef3.friction = 0.3f;
-            fixtureDef3.restitution = 1.0f;
-            theBrick3->CreateFixture(&fixtureDef3);
-            NSLog(@"Box 3");
         }
         if (thePaddle) {
             thePaddle->SetUserData((__bridge void *)self);
@@ -197,7 +163,7 @@ public:
         
         b2BodyDef ballBodyDef;
         ballBodyDef.type = b2_dynamicBody;
-        ballBodyDef.position.Set(BALL_POS_X, BALL_POS_Y);
+        ballBodyDef.position.Set(BALL_POS_X, 300);
         theBall = world->CreateBody(&ballBodyDef);
         if (theBall)
         {
@@ -220,6 +186,9 @@ public:
     ballHitBrick2 = false;
     ballHitBrick3 = false;
     ballLaunched = false;
+    
+    theBrick->SetLinearVelocity(b2Vec2(10000 , 0));
+
     return self;
 }
 
@@ -276,35 +245,38 @@ public:
         NSLog(@"Applying impulse %f to ball\n", BALL_VELOCITY);
         
     }
-    
+
     // If the last collision test was positive,
     //  stop the ball and destroy the brick
     if (ballHitBrick)
     {
         theBall->SetLinearVelocity(b2Vec2(randy, -BALL_VELOCITY));
         theBall->SetAngularVelocity(0);
-        world->DestroyBody(theBrick);
-        theBrick = NULL;
         ballHitBrick = false;
     }
     
-    if (ballHitBrick2)
-    {
-        theBall->SetLinearVelocity(b2Vec2(randy, -BALL_VELOCITY));
-        theBall->SetAngularVelocity(0);
-        world->DestroyBody(theBrick2);
-        theBrick2 = NULL;
-        ballHitBrick2 = false;
+    
+    
+    
+    
+    theBrick->SetTransform(b2Vec2(theBrick->GetPosition().x , BRICK_POS_Y), 0);
+    
+    if (theBrick->GetPosition().x < 50) {
+        theBrick->SetTransform(b2Vec2(50 , BRICK_POS_Y), 0);
+        theBrick->SetLinearVelocity(b2Vec2(theBrick->GetLinearVelocity().x * -1, 0));
+
+
     }
     
-    if (ballHitBrick3)
-    {
-        theBall->SetLinearVelocity(b2Vec2(randy, -BALL_VELOCITY));
-        theBall->SetAngularVelocity(0);
-        world->DestroyBody(theBrick3);
-        theBrick3 = NULL;
-        ballHitBrick3 = false;
+    if (theBrick->GetPosition().x > 750) {
+        theBrick->SetLinearVelocity(b2Vec2(theBrick->GetLinearVelocity().x * -1, 0));
+
+        theBrick->SetTransform(b2Vec2(750 , BRICK_POS_Y), 0);
     }
+    
+    
+
+    
     
     if (ballHitPaddle)
     {
@@ -691,15 +663,15 @@ public:
 
 -(void)moveBall:(CGPoint)x
 {
-    paddlex += x.x/1000;
+    paddlex = x.x/100;
     thePaddle->SetTransform(b2Vec2(paddlex + thePaddle->GetPosition().x, thePaddle->GetPosition().y), 0);
     
     if (paddlex + thePaddle->GetPosition().x < 50) {
         thePaddle->SetTransform(b2Vec2(50, thePaddle->GetPosition().y), 0);
     }
     
-    if (paddlex + thePaddle->GetPosition().x > 550) {
-        thePaddle->SetTransform(b2Vec2(550, thePaddle->GetPosition().y), 0);
+    if (paddlex + thePaddle->GetPosition().x > 750) {
+        thePaddle->SetTransform(b2Vec2(750, thePaddle->GetPosition().y), 0);
     }
     
     NSLog(@"MOVSDNG");
