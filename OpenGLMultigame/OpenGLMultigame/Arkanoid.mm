@@ -32,10 +32,14 @@
 #define BALL_RADIUS			15.0f
 #define BALL_VELOCITY		100000.0f
 #define BALL_SPHERE_SEGS	128
+#define PADDLE_POS_X        400
+#define PADDLE_POS_Y        30
 
 const float MAX_TIMESTEP = 1.0f/60.0f;
 const int NUM_VEL_ITERATIONS = 10;
 const int NUM_POS_ITERATIONS = 3;
+
+
 
 #pragma mark - Box2D contact listener class
 
@@ -56,7 +60,22 @@ public:
             b2Body* bodyA = contact->GetFixtureA()->GetBody();
             Arkanoid *parentObj = (__bridge Arkanoid *)(bodyA->GetUserData());
             // Call RegisterHit (assume CBox2D object is in user data)
-            [parentObj RegisterHit];
+            if (bodyA->GetPosition().x > BRICK_POS_X + 50) {
+                [parentObj RegisterHit2];
+
+            } else if (bodyA->GetPosition().x < BRICK_POS_X -50) {
+                [parentObj RegisterHit3];
+
+            } else {
+                [parentObj RegisterHit];
+            }
+            if (bodyA->GetPosition().y < 300) {
+                NSLog(@"Collision");
+//                if ((bodyA->GetPosition().x < PADDLE_POS_X + 50) && (bodyA->GetPosition().x > PADDLE_POS_X - 50)) {
+//                    // OK hit paddle
+                    [parentObj PaddleHit];
+//                }
+            }
         }
     }
     void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse) {};
@@ -76,10 +95,12 @@ public:
     b2Body *theBrick, *theBrick2, *theBrick3, *theBall, *thePaddle;
     CContactListener *contactListener;
     
+    float paddlex;
+    
     // GL-specific variables
     // You will need to set up 2 vertex arrays (for brick and ball)
-    GLuint brickVertexArray, ballVertexArray, brickVertexArray2, ballVertexArray2, brickVertexArray3, ballVertexArray3;
-    int numBrickVerts, numBallVerts, numBrickVerts2, numBallVerts2, numBrickVerts3, numBallVerts3;
+    GLuint brickVertexArray, ballVertexArray, brickVertexArray2, ballVertexArray2, brickVertexArray3, ballVertexArray3, paddleVertexArray;
+    int numBrickVerts, numBallVerts, numBrickVerts2, numBallVerts2, numBrickVerts3, numBallVerts3, paddleVerts;
     GLKMatrix4 modelViewProjectionMatrix;
     
     // You will also need some extra variables here
@@ -97,6 +118,7 @@ public:
     self = [super init];
     if (self) {
         gravity = new b2Vec2(0.0f, 0.0f); // Gravity should be -9.8
+        
         world = new b2World(*gravity);
         
         // For HelloWorld
@@ -109,7 +131,7 @@ public:
         world->SetContactListener(contactListener);
         
         // Set up the brick and ball objects for Box2D
-        b2BodyDef brickBodyDef, brickBodyDef2, brickBodyDef3;
+        b2BodyDef brickBodyDef, brickBodyDef2, brickBodyDef3, paddleBodyDef;
         brickBodyDef.type = b2_dynamicBody;
         brickBodyDef.position.Set(BRICK_POS_X, BRICK_POS_Y);
         theBrick = world->CreateBody(&brickBodyDef);
@@ -117,6 +139,8 @@ public:
         theBrick2 = world->CreateBody(&brickBodyDef2);
         brickBodyDef3.position.Set(BRICK_POS_X - 150, BRICK_POS_Y);
         theBrick3 = world->CreateBody(&brickBodyDef3);
+        paddleBodyDef.position.Set(BRICK_POS_X, BALL_POS_Y - 25	);
+        thePaddle = world->CreateBody(&paddleBodyDef);
         if (theBrick)
         {
             theBrick->SetUserData((__bridge void *)self);
@@ -130,7 +154,8 @@ public:
             fixtureDef.restitution = 1.0f;
             theBrick->CreateFixture(&fixtureDef);
             NSLog(@"Box 1");
-            
+        }
+        if (theBrick2) {
             theBrick2->SetUserData((__bridge void *)self);
             theBrick2->SetAwake(false);
             b2PolygonShape dynamicBox2;
@@ -142,7 +167,8 @@ public:
             fixtureDef2.restitution = 1.0f;
             theBrick2->CreateFixture(&fixtureDef2);
             NSLog(@"Box 2");
-            
+        }
+        if (theBrick3) {
             theBrick3->SetUserData((__bridge void *)self);
             theBrick3->SetAwake(false);
             b2PolygonShape dynamicBox3;
@@ -154,31 +180,46 @@ public:
             fixtureDef3.restitution = 1.0f;
             theBrick3->CreateFixture(&fixtureDef3);
             NSLog(@"Box 3");
-            
-            b2BodyDef ballBodyDef;
-            ballBodyDef.type = b2_dynamicBody;
-            ballBodyDef.position.Set(BALL_POS_X, BALL_POS_Y);
-            theBall = world->CreateBody(&ballBodyDef);
-            if (theBall)
-            {
-                theBall->SetUserData((__bridge void *)self);
-                theBall->SetAwake(false);
-                b2CircleShape circle;
-                circle.m_p.Set(0, 0);
-                circle.m_radius = BALL_RADIUS;
-                b2FixtureDef circleFixtureDef;
-                circleFixtureDef.shape = &circle;
-                circleFixtureDef.density = 1.0f;
-                circleFixtureDef.friction = 0.3f;
-                circleFixtureDef.restitution = 1.0f;
-                theBall->CreateFixture(&circleFixtureDef);
-            }
+        }
+        if (thePaddle) {
+            thePaddle->SetUserData((__bridge void *)self);
+            thePaddle->SetAwake(false);
+            b2PolygonShape dynamicBox4;
+            dynamicBox4.SetAsBox(BRICK_WIDTH/2, BRICK_HEIGHT/2);
+            b2FixtureDef fixtureDef4;
+            fixtureDef4.shape = &dynamicBox4;
+            fixtureDef4.density = 1.0f;
+            fixtureDef4.friction = 0.3f;
+            fixtureDef4.restitution = 1.0f;
+            thePaddle->CreateFixture(&fixtureDef4);
+            NSLog(@"BoxthePaddle");
         }
         
-        totalElapsedTime = 0;
-        ballHitBrick = false;
-        ballLaunched = false;
+        b2BodyDef ballBodyDef;
+        ballBodyDef.type = b2_dynamicBody;
+        ballBodyDef.position.Set(BALL_POS_X, BALL_POS_Y);
+        theBall = world->CreateBody(&ballBodyDef);
+        if (theBall)
+        {
+            theBall->SetUserData((__bridge void *)self);
+            theBall->SetAwake(false);
+            b2CircleShape circle;
+            circle.m_p.Set(0, 0);
+            circle.m_radius = BALL_RADIUS;
+            b2FixtureDef circleFixtureDef;
+            circleFixtureDef.shape = &circle;
+            circleFixtureDef.density = 1.0f;
+            circleFixtureDef.friction = 0.3f;
+            circleFixtureDef.restitution = 1.0f;
+            theBall->CreateFixture(&circleFixtureDef);
+        }
     }
+        
+    totalElapsedTime = 0;
+    ballHitBrick = false;
+    ballHitBrick2 = false;
+    ballHitBrick3 = false;
+    ballLaunched = false;
     return self;
 }
 
@@ -211,16 +252,65 @@ public:
     if ((totalElapsedTime > BRICK_WAIT) && theBrick)
         theBrick->SetAwake(true);
     
+    
+    int lb = -BALL_VELOCITY*2;
+    int ub = BALL_VELOCITY*2;
+    int randy = lb + arc4random() % (ub - lb);
+    
+    if (theBall->GetPosition().x > 800) {
+        theBall->SetLinearVelocity(b2Vec2(theBall->GetLinearVelocity().x * -1, theBall->GetLinearVelocity().y));
+        
+        NSLog(@"Applying impulse %f to ball\n", BALL_VELOCITY);
+
+    }
+    
+    
+    if (theBall->GetPosition().x < 0) {
+        theBall->SetLinearVelocity(b2Vec2(theBall->GetLinearVelocity().x * -1, theBall->GetLinearVelocity().y));
+        NSLog(@"Applying impulse %f to ball\n", BALL_VELOCITY);
+
+    }
+    
+    if (theBall->GetPosition().y > 565) {
+        theBall->SetLinearVelocity(b2Vec2(theBall->GetLinearVelocity().x + randy, -BALL_VELOCITY));
+        NSLog(@"Applying impulse %f to ball\n", BALL_VELOCITY);
+        
+    }
+    
     // If the last collision test was positive,
     //  stop the ball and destroy the brick
     if (ballHitBrick)
     {
-        theBall->SetLinearVelocity(b2Vec2(0, 0));
+        theBall->SetLinearVelocity(b2Vec2(randy, -BALL_VELOCITY));
         theBall->SetAngularVelocity(0);
-        theBall->SetActive(false);
         world->DestroyBody(theBrick);
         theBrick = NULL;
         ballHitBrick = false;
+    }
+    
+    if (ballHitBrick2)
+    {
+        theBall->SetLinearVelocity(b2Vec2(randy, -BALL_VELOCITY));
+        theBall->SetAngularVelocity(0);
+        world->DestroyBody(theBrick2);
+        theBrick2 = NULL;
+        ballHitBrick2 = false;
+    }
+    
+    if (ballHitBrick3)
+    {
+        theBall->SetLinearVelocity(b2Vec2(randy, -BALL_VELOCITY));
+        theBall->SetAngularVelocity(0);
+        world->DestroyBody(theBrick3);
+        theBrick3 = NULL;
+        ballHitBrick3 = false;
+    }
+    
+    if (ballHitPaddle)
+    {
+        theBall->SetLinearVelocity(b2Vec2(randy, BALL_VELOCITY));
+        theBall->SetAngularVelocity(0);
+        ballHitPaddle = false;
     }
     
     if (world)
@@ -297,7 +387,11 @@ public:
 //        glBindVertexArrayOES(brickVertexArray);
 //        if (theBrick && numBrickVerts > 0)
 //            glDrawArrays(GL_TRIANGLES, 0, numBrickVerts);
+    }
 #pragma mark - Second Block
+    if(theBrick2)
+    {
+        
         glGenVertexArraysOES(1, &brickVertexArray2);
         glBindVertexArrayOES(brickVertexArray2);
         
@@ -305,7 +399,7 @@ public:
         glGenBuffers(2, vertexBuffers2);
         glBindBuffer(GL_ARRAY_BUFFER, vertexBuffers2[0]);
         GLfloat vertPos2[18];
-        k = 0;
+        int k = 0;
         numBrickVerts2 = 0;
         vertPos2[k++] = theBrick2->GetPosition().x - BRICK_WIDTH/2;
         vertPos2[k++] = theBrick2->GetPosition().y + BRICK_HEIGHT/2;
@@ -350,7 +444,10 @@ public:
 //        glBindVertexArrayOES(brickVertexArray2);
 //        if (theBrick2 && numBrickVerts2 > 0)
 //            glDrawArrays(GL_TRIANGLES, 0, numBrickVerts2);
+    }
 #pragma mark - Third Block
+    if(theBrick3)
+    {
         glGenVertexArraysOES(1, &brickVertexArray3);
         glBindVertexArrayOES(brickVertexArray3);
         
@@ -358,7 +455,7 @@ public:
         glGenBuffers(2, vertexBuffers3);
         glBindBuffer(GL_ARRAY_BUFFER, vertexBuffers3[0]);
         GLfloat vertPos3[18];
-        k = 0;
+        int k = 0;
         numBrickVerts3 = 0;
         vertPos3[k++] = theBrick3->GetPosition().x - BRICK_WIDTH/2;
         vertPos3[k++] = theBrick3->GetPosition().y + BRICK_HEIGHT/2;
@@ -403,6 +500,62 @@ public:
 //        glBindVertexArrayOES(brickVertexArray3);
 //        if (theBrick3 && numBrickVerts3 > 0)
 //            glDrawArrays(GL_TRIANGLES, 0, numBrickVerts3);
+    }
+#pragma mark - The Paddle
+    if(thePaddle)
+    {
+        glGenVertexArraysOES(1, &paddleVertexArray);
+        glBindVertexArrayOES(paddleVertexArray);
+        
+        GLuint paddleVertexBuffer[2];
+        glGenBuffers(2, paddleVertexBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, paddleVertexBuffer[0]);
+        GLfloat padVerts[18];
+        int k = 0;
+        paddleVerts = 0;
+        padVerts[k++] = thePaddle->GetPosition().x - BRICK_WIDTH/2;
+        padVerts[k++] = thePaddle->GetPosition().y + BRICK_HEIGHT/2;
+        padVerts[k++] = 10;
+        paddleVerts++;
+        padVerts[k++] = thePaddle->GetPosition().x + BRICK_WIDTH/2;
+        padVerts[k++] = thePaddle->GetPosition().y + BRICK_HEIGHT/2;
+        padVerts[k++] = 10;
+        paddleVerts++;
+        padVerts[k++] = thePaddle->GetPosition().x + BRICK_WIDTH/2;
+        padVerts[k++] = thePaddle->GetPosition().y - BRICK_HEIGHT/2;
+        padVerts[k++] = 10;
+        paddleVerts++;
+        padVerts[k++] = thePaddle->GetPosition().x - BRICK_WIDTH/2;
+        padVerts[k++] = thePaddle->GetPosition().y + BRICK_HEIGHT/2;
+        padVerts[k++] = 10;
+        paddleVerts++;
+        padVerts[k++] = thePaddle->GetPosition().x + BRICK_WIDTH/2;
+        padVerts[k++] = thePaddle->GetPosition().y - BRICK_HEIGHT/2;
+        padVerts[k++] = 10;
+        paddleVerts++;
+        padVerts[k++] = thePaddle->GetPosition().x - BRICK_WIDTH/2;
+        padVerts[k++] = thePaddle->GetPosition().y - BRICK_HEIGHT/2;
+        padVerts[k++] = 10;
+        paddleVerts++;
+        glBufferData(GL_ARRAY_BUFFER, sizeof(padVerts), padVerts, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(VertexAttribPosition);
+        glVertexAttribPointer(VertexAttribPosition, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), BUFFER_OFFSET(0));
+        
+        GLfloat paddleCol[paddleVerts*3];
+        for (k=0; k<paddleVerts*3; k+=3)
+        {
+            paddleCol[k] = 1.0f;
+            paddleCol[k+1] = 0.0f;
+            paddleCol[k+2] = 0.0f;
+        }
+        glBindBuffer(GL_ARRAY_BUFFER, paddleVertexBuffer[1]);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(paddleCol), paddleCol, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(VertexAttribColor);
+        glVertexAttribPointer(VertexAttribColor, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), BUFFER_OFFSET(0));
+        
+        //        glBindVertexArrayOES(brickVertexArray3);
+        //        if (theBrick3 && numBrickVerts3 > 0)
+        //            glDrawArrays(GL_TRIANGLES, 0, numBrickVerts3);
     }
 
     
@@ -471,6 +624,10 @@ public:
         printf("Brick3: (%5.3f,%5.3f)",
                theBrick3->GetPosition().x, theBrick3->GetPosition().y);
     printf("\n");
+    if (thePaddle)
+    printf("The Paddle: (%5.3f,%5.3f)",
+           thePaddle->GetPosition().x, thePaddle->GetPosition().y);
+    printf("\n");
 
     
     glClearColor(0, 0, 0, 1.0f);
@@ -486,12 +643,16 @@ public:
         glDrawArrays(GL_TRIANGLES, 0, numBrickVerts);
     
     glBindVertexArrayOES(brickVertexArray2);
-    if (theBrick2 && numBrickVerts > 0)
+    if (theBrick2 && numBrickVerts2 > 0)
         glDrawArrays(GL_TRIANGLES, 0, numBrickVerts2);
     
     glBindVertexArrayOES(brickVertexArray3);
-    if (theBrick3 && numBrickVerts > 0)
+    if (theBrick3 && numBrickVerts3 > 0)
         glDrawArrays(GL_TRIANGLES, 0, numBrickVerts3);
+    
+    glBindVertexArrayOES(paddleVertexArray);
+    if (thePaddle && paddleVerts > 0)
+        glDrawArrays(GL_TRIANGLES, 0, paddleVerts);
     
     glBindVertexArrayOES(ballVertexArray);
     if (theBall && numBallVerts > 0)
@@ -505,10 +666,44 @@ public:
     ballHitBrick = true;
 }
 
+-(void)RegisterHit2
+{
+    // Set some flag here for processing later...
+    ballHitBrick2 = true;
+}
+
+-(void)RegisterHit3
+{
+    // Set some flag here for processing later...
+    ballHitBrick3 = true;
+}
+
 -(void)LaunchBall
 {
     // Set some flag here for processing later...
     ballLaunched = true;
+}
+
+-(void)PaddleHit
+{
+    ballHitPaddle = true;
+}
+
+-(void)moveBall:(CGPoint)x
+{
+    paddlex += x.x/1000;
+    thePaddle->SetTransform(b2Vec2(paddlex + thePaddle->GetPosition().x, thePaddle->GetPosition().y), 0);
+    
+    if (paddlex + thePaddle->GetPosition().x < 50) {
+        thePaddle->SetTransform(b2Vec2(50, thePaddle->GetPosition().y), 0);
+    }
+    
+    if (paddlex + thePaddle->GetPosition().x > 550) {
+        thePaddle->SetTransform(b2Vec2(550, thePaddle->GetPosition().y), 0);
+    }
+    
+    NSLog(@"MOVSDNG");
+    
 }
 
 -(void)HelloWorld

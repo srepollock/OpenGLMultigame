@@ -262,6 +262,18 @@
     return YES;
 }
 
+// misnomer should be movepaddle
+- (IBAction)moveball:(UIPanGestureRecognizer *)sender {
+    NSLog(@"Hitting");
+    if ((sender.state == UIGestureRecognizerStateBegan)
+        || (sender.state == UIGestureRecognizerStateChanged)) {
+        CGPoint x = [sender velocityInView:self.view];
+        NSLog(@"Moving Pan Call");
+        [box2d moveBall:x];
+        // += x.x/1000;
+    }
+}
+
 - (IBAction)singleTap:(id)sender
 {
     [box2d LaunchBall];

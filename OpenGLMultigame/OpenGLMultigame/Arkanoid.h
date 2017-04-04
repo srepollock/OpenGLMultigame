@@ -27,6 +27,10 @@ enum
 -(void) Update:(float)elapsedTime;
 -(void) Render:(int)mvpMatPtr;
 -(void) RegisterHit;
+-(void) RegisterHit2;
+-(void) RegisterHit3;
+-(void) PaddleHit;
+-(void) moveBall:(CGPoint)x;
 
 @end
 
