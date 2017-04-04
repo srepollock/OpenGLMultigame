@@ -34,6 +34,7 @@
 #define BALL_SPHERE_SEGS	128
 #define PADDLE_POS_X        400
 #define PADDLE_POS_Y        30
+#define SCREEN_HEIGHT       550
 
 const float MAX_TIMESTEP = 1.0f/60.0f;
 const int NUM_VEL_ITERATIONS = 10;
@@ -103,6 +104,7 @@ public:
     bool ballHitBrick, ballHitBrick2, ballHitBrick3;
     bool ballHitPaddle;
     bool ballLaunched;
+    bool restartLaunch;
     float totalElapsedTime;
 }
 @end
@@ -186,6 +188,7 @@ public:
     ballHitBrick2 = false;
     ballHitBrick3 = false;
     ballLaunched = false;
+    restartLaunch = true; // initially
     
     theBrick->SetLinearVelocity(b2Vec2(10000 , 0));
 
@@ -205,14 +208,12 @@ public:
 {
     // Check here if we need to launch the ball
     //  and if so, use ApplyLinearImpulse() and SetActive(true)
-    if (ballLaunched)
+    if (ballLaunched && restartLaunch)
     {
         theBall->ApplyLinearImpulse(b2Vec2(0, BALL_VELOCITY), theBall->GetPosition(), true);
         theBall->SetActive(true);
-#ifdef LOG_TO_CONSOLE
-        NSLog(@"Applying impulse %f to ball\n", BALL_VELOCITY);
-#endif
         ballLaunched = false;
+        restartLaunch = false;
     }
     
     // Check if it is time yet to drop the brick, and if so
@@ -255,17 +256,11 @@ public:
         ballHitBrick = false;
     }
     
-    
-    
-    
-    
     theBrick->SetTransform(b2Vec2(theBrick->GetPosition().x , BRICK_POS_Y), 0);
     
     if (theBrick->GetPosition().x < 50) {
         theBrick->SetTransform(b2Vec2(50 , BRICK_POS_Y), 0);
         theBrick->SetLinearVelocity(b2Vec2(theBrick->GetLinearVelocity().x * -1, 0));
-
-
     }
     
     if (theBrick->GetPosition().x > 750) {
@@ -274,15 +269,15 @@ public:
         theBrick->SetTransform(b2Vec2(750 , BRICK_POS_Y), 0);
     }
     
-    
-
-    
-    
     if (ballHitPaddle)
     {
         theBall->SetLinearVelocity(b2Vec2(randy, BALL_VELOCITY));
         theBall->SetAngularVelocity(0);
         ballHitPaddle = false;
+    }
+    
+    if (theBall->GetPosition().y > SCREEN_HEIGHT || theBall->GetPosition().y < 0) {
+        [self resetBallPos];
     }
     
     if (world)
@@ -659,6 +654,15 @@ public:
 -(void)PaddleHit
 {
     ballHitPaddle = true;
+    ballHitBrick = ballHitBrick2 = ballHitBrick3 = false;
+}
+
+-(void)resetBallPos
+{
+    theBall->SetLinearVelocity(b2Vec2(0, 0));
+    theBall->SetTransform(b2Vec2(BALL_POS_X, 300), 0);
+    theBall->SetActive(false);
+    restartLaunch = true;
 }
 
 -(void)moveBall:(CGPoint)x
@@ -673,9 +677,6 @@ public:
     if (paddlex + thePaddle->GetPosition().x > 750) {
         thePaddle->SetTransform(b2Vec2(750, thePaddle->GetPosition().y), 0);
     }
-    
-    NSLog(@"MOVSDNG");
-    
 }
 
 -(void)HelloWorld

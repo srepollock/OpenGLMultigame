@@ -31,6 +31,8 @@ enum
 -(void) RegisterHit3;
 -(void) PaddleHit;
 -(void) moveBall:(CGPoint)x;
+-(int) getBrickCount;
+-(int) getBallsLeft;
 
 @end
 

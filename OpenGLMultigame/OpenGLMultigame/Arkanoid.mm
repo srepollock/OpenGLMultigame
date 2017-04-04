@@ -39,8 +39,6 @@ const float MAX_TIMESTEP = 1.0f/60.0f;
 const int NUM_VEL_ITERATIONS = 10;
 const int NUM_POS_ITERATIONS = 3;
 
-
-
 #pragma mark - Box2D contact listener class
 
 class CContactListener : public b2ContactListener
@@ -60,21 +58,14 @@ public:
             b2Body* bodyA = contact->GetFixtureA()->GetBody();
             Arkanoid *parentObj = (__bridge Arkanoid *)(bodyA->GetUserData());
             // Call RegisterHit (assume CBox2D object is in user data)
-            if (bodyA->GetPosition().x > BRICK_POS_X + 50) {
-                [parentObj RegisterHit2];
-
-            } else if (bodyA->GetPosition().x < BRICK_POS_X -50) {
-                [parentObj RegisterHit3];
-
-            } else {
-                [parentObj RegisterHit];
-            }
             if (bodyA->GetPosition().y < 300) {
-                NSLog(@"Collision");
-//                if ((bodyA->GetPosition().x < PADDLE_POS_X + 50) && (bodyA->GetPosition().x > PADDLE_POS_X - 50)) {
-//                    // OK hit paddle
-                    [parentObj PaddleHit];
-//                }
+                [parentObj PaddleHit];
+            } else if (bodyA->GetPosition().x > BRICK_POS_X + 60) {
+                [parentObj RegisterHit2];
+            } else if (bodyA->GetPosition().x < BRICK_POS_X -60) {
+                [parentObj RegisterHit3];
+            } else if (bodyA->GetPosition().y > (BRICK_POS_Y - 5)){
+                [parentObj RegisterHit];
             }
         }
     }
@@ -107,7 +98,9 @@ public:
     bool ballHitBrick, ballHitBrick2, ballHitBrick3;
     bool ballHitPaddle;
     bool ballLaunched;
+    bool restartLaunch;
     float totalElapsedTime;
+    int brickCount, ballsLeft;
 }
 @end
 
@@ -220,6 +213,9 @@ public:
     ballHitBrick2 = false;
     ballHitBrick3 = false;
     ballLaunched = false;
+    restartLaunch = true; // initially
+    brickCount = 3;
+    ballsLeft = 3;
     return self;
 }
 
@@ -236,14 +232,12 @@ public:
 {
     // Check here if we need to launch the ball
     //  and if so, use ApplyLinearImpulse() and SetActive(true)
-    if (ballLaunched)
+    if (ballLaunched && restartLaunch)
     {
         theBall->ApplyLinearImpulse(b2Vec2(0, BALL_VELOCITY), theBall->GetPosition(), true);
         theBall->SetActive(true);
-#ifdef LOG_TO_CONSOLE
-        NSLog(@"Applying impulse %f to ball\n", BALL_VELOCITY);
-#endif
         ballLaunched = false;
+        restartLaunch = false;
     }
     
     // Check if it is time yet to drop the brick, and if so
@@ -264,7 +258,6 @@ public:
 
     }
     
-    
     if (theBall->GetPosition().x < 0) {
         theBall->SetLinearVelocity(b2Vec2(theBall->GetLinearVelocity().x * -1, theBall->GetLinearVelocity().y));
         NSLog(@"Applying impulse %f to ball\n", BALL_VELOCITY);
@@ -275,6 +268,11 @@ public:
         theBall->SetLinearVelocity(b2Vec2(theBall->GetLinearVelocity().x + randy, -BALL_VELOCITY));
         NSLog(@"Applying impulse %f to ball\n", BALL_VELOCITY);
         
+    }
+
+    if (theBall->GetPosition().y < 0) {
+        [self resetBallPos];
+        ballsLeft--;
     }
     
     // If the last collision test was positive,
@@ -383,10 +381,6 @@ public:
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertCol), vertCol, GL_STATIC_DRAW);
         glEnableVertexAttribArray(VertexAttribColor);
         glVertexAttribPointer(VertexAttribColor, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), BUFFER_OFFSET(0));
-        
-//        glBindVertexArrayOES(brickVertexArray);
-//        if (theBrick && numBrickVerts > 0)
-//            glDrawArrays(GL_TRIANGLES, 0, numBrickVerts);
     }
 #pragma mark - Second Block
     if(theBrick2)
@@ -440,10 +434,6 @@ public:
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertCol2), vertCol2, GL_STATIC_DRAW);
         glEnableVertexAttribArray(VertexAttribColor);
         glVertexAttribPointer(VertexAttribColor, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), BUFFER_OFFSET(0));
-        
-//        glBindVertexArrayOES(brickVertexArray2);
-//        if (theBrick2 && numBrickVerts2 > 0)
-//            glDrawArrays(GL_TRIANGLES, 0, numBrickVerts2);
     }
 #pragma mark - Third Block
     if(theBrick3)
@@ -496,10 +486,6 @@ public:
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertCol3), vertCol3, GL_STATIC_DRAW);
         glEnableVertexAttribArray(VertexAttribColor);
         glVertexAttribPointer(VertexAttribColor, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), BUFFER_OFFSET(0));
-        
-//        glBindVertexArrayOES(brickVertexArray3);
-//        if (theBrick3 && numBrickVerts3 > 0)
-//            glDrawArrays(GL_TRIANGLES, 0, numBrickVerts3);
     }
 #pragma mark - The Paddle
     if(thePaddle)
@@ -552,10 +538,6 @@ public:
         glBufferData(GL_ARRAY_BUFFER, sizeof(paddleCol), paddleCol, GL_STATIC_DRAW);
         glEnableVertexAttribArray(VertexAttribColor);
         glVertexAttribPointer(VertexAttribColor, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), BUFFER_OFFSET(0));
-        
-        //        glBindVertexArrayOES(brickVertexArray3);
-        //        if (theBrick3 && numBrickVerts3 > 0)
-        //            glDrawArrays(GL_TRIANGLES, 0, numBrickVerts3);
     }
 
     
@@ -596,8 +578,6 @@ public:
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertCol), vertCol, GL_STATIC_DRAW);
         glEnableVertexAttribArray(VertexAttribColor);
         glVertexAttribPointer(VertexAttribColor, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), BUFFER_OFFSET(0));
-        
-       
         
         glBindVertexArrayOES(0);
     }
@@ -664,18 +644,21 @@ public:
 {
     // Set some flag here for processing later...
     ballHitBrick = true;
+    brickCount--;
 }
 
 -(void)RegisterHit2
 {
     // Set some flag here for processing later...
     ballHitBrick2 = true;
+    brickCount--;
 }
 
 -(void)RegisterHit3
 {
     // Set some flag here for processing later...
     ballHitBrick3 = true;
+    brickCount--;
 }
 
 -(void)LaunchBall
@@ -687,23 +670,39 @@ public:
 -(void)PaddleHit
 {
     ballHitPaddle = true;
+    ballHitBrick = ballHitBrick2 = ballHitBrick3 = false;
+}
+
+-(void)resetBallPos
+{
+    theBall->SetLinearVelocity(b2Vec2(0, 0));
+    theBall->SetTransform(b2Vec2(BALL_POS_X, BALL_POS_Y), 0);
+    theBall->SetActive(false);
+    restartLaunch = true;
 }
 
 -(void)moveBall:(CGPoint)x
 {
-    paddlex += x.x/1000;
+    paddlex = x.x/100;
     thePaddle->SetTransform(b2Vec2(paddlex + thePaddle->GetPosition().x, thePaddle->GetPosition().y), 0);
     
     if (paddlex + thePaddle->GetPosition().x < 50) {
         thePaddle->SetTransform(b2Vec2(50, thePaddle->GetPosition().y), 0);
     }
     
-    if (paddlex + thePaddle->GetPosition().x > 550) {
-        thePaddle->SetTransform(b2Vec2(550, thePaddle->GetPosition().y), 0);
-    }
-    
-    NSLog(@"MOVSDNG");
-    
+    if (paddlex + thePaddle->GetPosition().x > 750) {
+        thePaddle->SetTransform(b2Vec2(750, thePaddle->GetPosition().y), 0);
+    }   
+}
+
+-(int) getBrickCount
+{
+    return brickCount;
+}
+
+-(int) getBallsLeft
+{
+    return ballsLeft;
 }
 
 -(void)HelloWorld

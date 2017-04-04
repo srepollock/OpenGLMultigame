@@ -103,6 +103,9 @@
 - (void)update
 {
     [box2d Update:self.timeSinceLastUpdate];
+    if ([box2d getBrickCount] <= 0 || [box2d getBallsLeft] <= 0) {
+        [self.navigationController popViewControllerAnimated:YES];
+    }
 }
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
@@ -268,9 +271,7 @@
     if ((sender.state == UIGestureRecognizerStateBegan)
         || (sender.state == UIGestureRecognizerStateChanged)) {
         CGPoint x = [sender velocityInView:self.view];
-        NSLog(@"Moving Pan Call");
         [box2d moveBall:x];
-        // += x.x/1000;
     }
 }
 
