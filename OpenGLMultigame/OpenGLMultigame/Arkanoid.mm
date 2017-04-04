@@ -73,7 +73,7 @@ public:
     b2BodyDef *groundBodyDef;
     b2Body *groundBody;
     b2PolygonShape *groundBox;
-    b2Body *theBrick, *theBall;
+    b2Body *theBrick, *theBrick2, *theBrick3, *theBall, *thePaddle;
     CContactListener *contactListener;
     
     // GL-specific variables
@@ -83,7 +83,8 @@ public:
     GLKMatrix4 modelViewProjectionMatrix;
     
     // You will also need some extra variables here
-    bool ballHitBrick;
+    bool ballHitBrick, ballHitBrick2, ballHitBrick3;
+    bool ballHitPaddle;
     bool ballLaunched;
     float totalElapsedTime;
 }
@@ -95,7 +96,7 @@ public:
 {
     self = [super init];
     if (self) {
-        gravity = new b2Vec2(0.0f, -10.0f);
+        gravity = new b2Vec2(0.0f, 0.0f); // Gravity should be -9.8
         world = new b2World(*gravity);
         
         // For HelloWorld
@@ -108,10 +109,14 @@ public:
         world->SetContactListener(contactListener);
         
         // Set up the brick and ball objects for Box2D
-        b2BodyDef brickBodyDef;
+        b2BodyDef brickBodyDef, brickBodyDef2, brickBodyDef3;
         brickBodyDef.type = b2_dynamicBody;
         brickBodyDef.position.Set(BRICK_POS_X, BRICK_POS_Y);
         theBrick = world->CreateBody(&brickBodyDef);
+        brickBodyDef2.position.Set(BRICK_POS_X + 150, BRICK_POS_Y);
+        theBrick2 = world->CreateBody(&brickBodyDef2);
+        brickBodyDef3.position.Set(BRICK_POS_X - 150, BRICK_POS_Y);
+        theBrick3 = world->CreateBody(&brickBodyDef3);
         if (theBrick)
         {
             theBrick->SetUserData((__bridge void *)self);
@@ -124,6 +129,31 @@ public:
             fixtureDef.friction = 0.3f;
             fixtureDef.restitution = 1.0f;
             theBrick->CreateFixture(&fixtureDef);
+            NSLog(@"Box 1");
+            
+            theBrick2->SetUserData((__bridge void *)self);
+            theBrick2->SetAwake(false);
+            b2PolygonShape dynamicBox2;
+            dynamicBox2.SetAsBox(BRICK_WIDTH/2, BRICK_HEIGHT/2);
+            b2FixtureDef fixtureDef2;
+            fixtureDef2.shape = &dynamicBox2;
+            fixtureDef2.density = 1.0f;
+            fixtureDef2.friction = 0.3f;
+            fixtureDef2.restitution = 1.0f;
+            theBrick2->CreateFixture(&fixtureDef2);
+            NSLog(@"Box 2");
+            
+            theBrick3->SetUserData((__bridge void *)self);
+            theBrick3->SetAwake(false);
+            b2PolygonShape dynamicBox3;
+            dynamicBox3.SetAsBox(BRICK_WIDTH/2, BRICK_HEIGHT/2);
+            b2FixtureDef fixtureDef3;
+            fixtureDef3.shape = &dynamicBox3;
+            fixtureDef3.density = 1.0f;
+            fixtureDef3.friction = 0.3f;
+            fixtureDef3.restitution = 1.0f;
+            theBrick3->CreateFixture(&fixtureDef3);
+            NSLog(@"Box 3");
             
             b2BodyDef ballBodyDef;
             ballBodyDef.type = b2_dynamicBody;
@@ -264,7 +294,9 @@ public:
         glEnableVertexAttribArray(VertexAttribColor);
         glVertexAttribPointer(VertexAttribColor, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), BUFFER_OFFSET(0));
         
-        glBindVertexArrayOES(0);
+//        glBindVertexArrayOES(brickVertexArray);
+//        if (theBrick && numBrickVerts > 0)
+//            glDrawArrays(GL_TRIANGLES, 0, numBrickVerts);
 #pragma mark - Second Block
         glGenVertexArraysOES(1, &brickVertexArray2);
         glBindVertexArrayOES(brickVertexArray2);
@@ -275,28 +307,28 @@ public:
         GLfloat vertPos2[18];
         k = 0;
         numBrickVerts2 = 0;
-        vertPos2[k++] = theBrick->GetPosition().x - BRICK_WIDTH/2;
-        vertPos2[k++] = theBrick->GetPosition().y + BRICK_HEIGHT/2;
+        vertPos2[k++] = theBrick2->GetPosition().x - BRICK_WIDTH/2;
+        vertPos2[k++] = theBrick2->GetPosition().y + BRICK_HEIGHT/2;
         vertPos2[k++] = 10;
         numBrickVerts2++;
-        vertPos2[k++] = theBrick->GetPosition().x + BRICK_WIDTH/2;
-        vertPos2[k++] = theBrick->GetPosition().y + BRICK_HEIGHT/2;
+        vertPos2[k++] = theBrick2->GetPosition().x + BRICK_WIDTH/2;
+        vertPos2[k++] = theBrick2->GetPosition().y + BRICK_HEIGHT/2;
         vertPos2[k++] = 10;
         numBrickVerts2++;
-        vertPos2[k++] = theBrick->GetPosition().x + BRICK_WIDTH/2;
-        vertPos2[k++] = theBrick->GetPosition().y - BRICK_HEIGHT/2;
+        vertPos2[k++] = theBrick2->GetPosition().x + BRICK_WIDTH/2;
+        vertPos2[k++] = theBrick2->GetPosition().y - BRICK_HEIGHT/2;
         vertPos2[k++] = 10;
         numBrickVerts2++;
-        vertPos2[k++] = theBrick->GetPosition().x - BRICK_WIDTH/2;
-        vertPos2[k++] = theBrick->GetPosition().y + BRICK_HEIGHT/2;
+        vertPos2[k++] = theBrick2->GetPosition().x - BRICK_WIDTH/2;
+        vertPos2[k++] = theBrick2->GetPosition().y + BRICK_HEIGHT/2;
         vertPos2[k++] = 10;
         numBrickVerts2++;
-        vertPos2[k++] = theBrick->GetPosition().x + BRICK_WIDTH/2;
-        vertPos2[k++] = theBrick->GetPosition().y - BRICK_HEIGHT/2;
+        vertPos2[k++] = theBrick2->GetPosition().x + BRICK_WIDTH/2;
+        vertPos2[k++] = theBrick2->GetPosition().y - BRICK_HEIGHT/2;
         vertPos2[k++] = 10;
         numBrickVerts2++;
-        vertPos2[k++] = theBrick->GetPosition().x - BRICK_WIDTH/2;
-        vertPos2[k++] = theBrick->GetPosition().y - BRICK_HEIGHT/2;
+        vertPos2[k++] = theBrick2->GetPosition().x - BRICK_WIDTH/2;
+        vertPos2[k++] = theBrick2->GetPosition().y - BRICK_HEIGHT/2;
         vertPos2[k++] = 10;
         numBrickVerts2++;
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertPos2), vertPos2, GL_STATIC_DRAW);
@@ -315,7 +347,9 @@ public:
         glEnableVertexAttribArray(VertexAttribColor);
         glVertexAttribPointer(VertexAttribColor, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), BUFFER_OFFSET(0));
         
-        glBindVertexArrayOES(0);
+//        glBindVertexArrayOES(brickVertexArray2);
+//        if (theBrick2 && numBrickVerts2 > 0)
+//            glDrawArrays(GL_TRIANGLES, 0, numBrickVerts2);
 #pragma mark - Third Block
         glGenVertexArraysOES(1, &brickVertexArray3);
         glBindVertexArrayOES(brickVertexArray3);
@@ -326,28 +360,28 @@ public:
         GLfloat vertPos3[18];
         k = 0;
         numBrickVerts3 = 0;
-        vertPos3[k++] = theBrick->GetPosition().x - BRICK_WIDTH/2;
-        vertPos3[k++] = theBrick->GetPosition().y + BRICK_HEIGHT/2;
+        vertPos3[k++] = theBrick3->GetPosition().x - BRICK_WIDTH/2;
+        vertPos3[k++] = theBrick3->GetPosition().y + BRICK_HEIGHT/2;
         vertPos3[k++] = 10;
         numBrickVerts3++;
-        vertPos3[k++] = theBrick->GetPosition().x + BRICK_WIDTH/2;
-        vertPos3[k++] = theBrick->GetPosition().y + BRICK_HEIGHT/2;
+        vertPos3[k++] = theBrick3->GetPosition().x + BRICK_WIDTH/2;
+        vertPos3[k++] = theBrick3->GetPosition().y + BRICK_HEIGHT/2;
         vertPos3[k++] = 10;
         numBrickVerts3++;
-        vertPos3[k++] = theBrick->GetPosition().x + BRICK_WIDTH/2;
-        vertPos3[k++] = theBrick->GetPosition().y - BRICK_HEIGHT/2;
+        vertPos3[k++] = theBrick3->GetPosition().x + BRICK_WIDTH/2;
+        vertPos3[k++] = theBrick3->GetPosition().y - BRICK_HEIGHT/2;
         vertPos3[k++] = 10;
         numBrickVerts3++;
-        vertPos3[k++] = theBrick->GetPosition().x - BRICK_WIDTH/2;
-        vertPos3[k++] = theBrick->GetPosition().y + BRICK_HEIGHT/2;
+        vertPos3[k++] = theBrick3->GetPosition().x - BRICK_WIDTH/2;
+        vertPos3[k++] = theBrick3->GetPosition().y + BRICK_HEIGHT/2;
         vertPos3[k++] = 10;
         numBrickVerts3++;
-        vertPos3[k++] = theBrick->GetPosition().x + BRICK_WIDTH/2;
-        vertPos3[k++] = theBrick->GetPosition().y - BRICK_HEIGHT/2;
+        vertPos3[k++] = theBrick3->GetPosition().x + BRICK_WIDTH/2;
+        vertPos3[k++] = theBrick3->GetPosition().y - BRICK_HEIGHT/2;
         vertPos3[k++] = 10;
         numBrickVerts3++;
-        vertPos3[k++] = theBrick->GetPosition().x - BRICK_WIDTH/2;
-        vertPos3[k++] = theBrick->GetPosition().y - BRICK_HEIGHT/2;
+        vertPos3[k++] = theBrick3->GetPosition().x - BRICK_WIDTH/2;
+        vertPos3[k++] = theBrick3->GetPosition().y - BRICK_HEIGHT/2;
         vertPos3[k++] = 10;
         numBrickVerts3++;
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertPos3), vertPos3, GL_STATIC_DRAW);
@@ -366,9 +400,11 @@ public:
         glEnableVertexAttribArray(VertexAttribColor);
         glVertexAttribPointer(VertexAttribColor, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), BUFFER_OFFSET(0));
         
-        glBindVertexArrayOES(0);
+//        glBindVertexArrayOES(brickVertexArray3);
+//        if (theBrick3 && numBrickVerts3 > 0)
+//            glDrawArrays(GL_TRIANGLES, 0, numBrickVerts3);
     }
-    
+
     
     if (theBall)
     {
@@ -408,6 +444,8 @@ public:
         glEnableVertexAttribArray(VertexAttribColor);
         glVertexAttribPointer(VertexAttribColor, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), BUFFER_OFFSET(0));
         
+       
+        
         glBindVertexArrayOES(0);
     }
     
@@ -419,15 +457,21 @@ public:
 
 -(void)Render:(int)mvpMatPtr
 {
-#ifdef LOG_TO_CONSOLE
+
     if (theBall)
         printf("Ball: (%5.3f,%5.3f)\t",
                theBall->GetPosition().x, theBall->GetPosition().y);
     if (theBrick)
         printf("Brick: (%5.3f,%5.3f)",
                theBrick->GetPosition().x, theBrick->GetPosition().y);
+    if (theBrick2)
+        printf("Brick2: (%5.3f,%5.3f)",
+               theBrick2->GetPosition().x, theBrick2->GetPosition().y);
+    if (theBrick3)
+        printf("Brick3: (%5.3f,%5.3f)",
+               theBrick3->GetPosition().x, theBrick3->GetPosition().y);
     printf("\n");
-#endif
+
     
     glClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -442,11 +486,11 @@ public:
         glDrawArrays(GL_TRIANGLES, 0, numBrickVerts);
     
     glBindVertexArrayOES(brickVertexArray2);
-    if (theBrick && numBrickVerts > 0)
+    if (theBrick2 && numBrickVerts > 0)
         glDrawArrays(GL_TRIANGLES, 0, numBrickVerts2);
     
     glBindVertexArrayOES(brickVertexArray3);
-    if (theBrick && numBrickVerts > 0)
+    if (theBrick3 && numBrickVerts > 0)
         glDrawArrays(GL_TRIANGLES, 0, numBrickVerts3);
     
     glBindVertexArrayOES(ballVertexArray);
@@ -467,61 +511,59 @@ public:
     ballLaunched = true;
 }
 
-
-
 -(void)HelloWorld
 {
-    groundBodyDef = new b2BodyDef;
-    groundBodyDef->position.Set(0.0f, -10.0f);
-    groundBody = world->CreateBody(groundBodyDef);
-    groundBox = new b2PolygonShape;
-    groundBox->SetAsBox(50.0f, 10.0f);
-    
-    groundBody->CreateFixture(groundBox, 0.0f);
-    
-    // Define the dynamic body. We set its position and call the body factory.
-    b2BodyDef bodyDef;
-    bodyDef.type = b2_dynamicBody;
-    bodyDef.position.Set(0.0f, 4.0f);
-    b2Body* body = world->CreateBody(&bodyDef);
-    
-    // Define another box shape for our dynamic body.
-    b2PolygonShape dynamicBox;
-    dynamicBox.SetAsBox(1.0f, 1.0f);
-    
-    // Define the dynamic body fixture.
-    b2FixtureDef fixtureDef;
-    fixtureDef.shape = &dynamicBox;
-    
-    // Set the box density to be non-zero, so it will be dynamic.
-    fixtureDef.density = 1.0f;
-    
-    // Override the default friction.
-    fixtureDef.friction = 0.3f;
-    
-    // Add the shape to the body.
-    body->CreateFixture(&fixtureDef);
-    
-    // Prepare for simulation. Typically we use a time step of 1/60 of a
-    // second (60Hz) and 10 iterations. This provides a high quality simulation
-    // in most game scenarios.
-    float32 timeStep = 1.0f / 60.0f;
-    int32 velocityIterations = 6;
-    int32 positionIterations = 2;
-    
-    // This is our little game loop.
-    for (int32 i = 0; i < 60; ++i)
-    {
-        // Instruct the world to perform a single step of simulation.
-        // It is generally best to keep the time step and iterations fixed.
-        world->Step(timeStep, velocityIterations, positionIterations);
-        
-        // Now print the position and angle of the body.
-        b2Vec2 position = body->GetPosition();
-        float32 angle = body->GetAngle();
-        
-        printf("%4.2f %4.2f %4.2f\n", position.x, position.y, angle);
-    }
+//    groundBodyDef = new b2BodyDef;
+//    groundBodyDef->position.Set(0.0f, -10.0f);
+//    groundBody = world->CreateBody(groundBodyDef);
+//    groundBox = new b2PolygonShape;
+//    groundBox->SetAsBox(50.0f, 10.0f);
+//    
+//    groundBody->CreateFixture(groundBox, 0.0f);
+//    
+//    // Define the dynamic body. We set its position and call the body factory.
+//    b2BodyDef bodyDef;
+//    bodyDef.type = b2_dynamicBody;
+//    bodyDef.position.Set(0.0f, 4.0f);
+//    b2Body* body = world->CreateBody(&bodyDef);
+//    
+//    // Define another box shape for our dynamic body.
+//    b2PolygonShape dynamicBox;
+//    dynamicBox.SetAsBox(1.0f, 1.0f);
+//    
+//    // Define the dynamic body fixture.
+//    b2FixtureDef fixtureDef;
+//    fixtureDef.shape = &dynamicBox;
+//    
+//    // Set the box density to be non-zero, so it will be dynamic.
+//    fixtureDef.density = 1.0f;
+//    
+//    // Override the default friction.
+//    fixtureDef.friction = 0.3f;
+//    
+//    // Add the shape to the body.
+//    body->CreateFixture(&fixtureDef);
+//    
+//    // Prepare for simulation. Typically we use a time step of 1/60 of a
+//    // second (60Hz) and 10 iterations. This provides a high quality simulation
+//    // in most game scenarios.
+//    float32 timeStep = 1.0f / 60.0f;
+//    int32 velocityIterations = 6;
+//    int32 positionIterations = 2;
+//    
+//    // This is our little game loop.
+//    for (int32 i = 0; i < 60; ++i)
+//    {
+//        // Instruct the world to perform a single step of simulation.
+//        // It is generally best to keep the time step and iterations fixed.
+//        world->Step(timeStep, velocityIterations, positionIterations);
+//        
+//        // Now print the position and angle of the body.
+//        b2Vec2 position = body->GetPosition();
+//        float32 angle = body->GetAngle();
+//        
+//        printf("%4.2f %4.2f %4.2f\n", position.x, position.y, angle);
+//    }
 }
 
 @end
