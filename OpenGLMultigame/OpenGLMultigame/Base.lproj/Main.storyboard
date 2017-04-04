@@ -142,19 +142,34 @@
         <!--Pong-->
         <scene sceneID="wRn-ip-d4G">
             <objects>
-                <viewController title="Pong" id="0Ok-a9-IuO" sceneMemberID="viewController">
+                <viewController title="Pong" id="0Ok-a9-IuO" customClass="PongViewController" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="lAu-Cx-osi"/>
                         <viewControllerLayoutGuide type="bottom" id="nyV-n2-9q4"/>
                     </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="Fck-tw-mA7">
+                    <view key="view" contentMode="scaleToFill" id="Fck-tw-mA7" customClass="GLKView">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <gestureRecognizers/>
+                        <connections>
+                            <outletCollection property="gestureRecognizers" destination="bo5-3o-Q5Y" appends="YES" id="r4q-A3-OIs"/>
+                            <outletCollection property="gestureRecognizers" destination="CT2-aB-y5q" appends="YES" id="nMB-eL-4k4"/>
+                        </connections>
                     </view>
                     <navigationItem key="navigationItem" id="R7s-ch-tyz"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="yKN-ym-NFI" sceneMemberID="firstResponder"/>
+                <panGestureRecognizer minimumNumberOfTouches="1" id="bo5-3o-Q5Y">
+                    <connections>
+                        <action selector="moveball:" destination="0Ok-a9-IuO" id="o4P-TR-p5Y"/>
+                    </connections>
+                </panGestureRecognizer>
+                <tapGestureRecognizer id="CT2-aB-y5q">
+                    <connections>
+                        <action selector="singleTap:" destination="0Ok-a9-IuO" id="c8e-Lt-WnG"/>
+                    </connections>
+                </tapGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="1633" y="806"/>
         </scene>

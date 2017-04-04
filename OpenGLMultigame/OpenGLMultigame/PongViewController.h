@@ -1,14 +1,15 @@
 //
 //  GameViewController.h
-//  OpenGLMultigame
+//  MyGLGame
 //
-//  Created by Spencer Pollock on 2017-03-30.
-//  Copyright © 2017 HankSpencer. All rights reserved.
+//  Created by Borna Noureddin on 2015-01-28.
+//  Copyright (c) 2015 BCIT. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
 #import <GLKit/GLKit.h>
 
 @interface PongViewController : GLKViewController
+- (IBAction)singleTap:(id)sender;
 
 @end
