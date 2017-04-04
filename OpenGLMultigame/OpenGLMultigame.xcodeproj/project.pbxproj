@@ -675,10 +675,16 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = 26RCKZ873P;
-				HEADER_SEARCH_PATHS = "/Users/Spencer/Documents/xCode/OpenGLMultigame/OpenGLMultigame/OpenGLMultigame/Box2D/**";
+				HEADER_SEARCH_PATHS = (
+					"/Users/a00924319/Desktop/openglmultigame/OpenGLMultigame/OpenGLMultigame/**",
+					"/Users/Spencer/Documents/xCode/OpenGLMultigame/OpenGLMultigame/OpenGLMultigame/Box2D/**",
+				);
 				INFOPLIST_FILE = OpenGLMultigame/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = "/Users/Spencer/Documents/xCode/OpenGLMultigame/OpenGLMultigame/OpenGLMultigame/Box2D/**";
+				LIBRARY_SEARCH_PATHS = (
+					"/Users/Spencer/Documents/xCode/OpenGLMultigame/OpenGLMultigame/OpenGLMultigame/Box2D/**",
+					"/Users/a00924319/Desktop/openglmultigame/OpenGLMultigame/OpenGLMultigame/**",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = ca.hs.OpenGLMultigame;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -689,10 +695,16 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = 26RCKZ873P;
-				HEADER_SEARCH_PATHS = "/Users/Spencer/Documents/xCode/OpenGLMultigame/OpenGLMultigame/OpenGLMultigame/Box2D/**";
+				HEADER_SEARCH_PATHS = (
+					"/Users/a00924319/Desktop/openglmultigame/OpenGLMultigame/OpenGLMultigame/**",
+					"/Users/Spencer/Documents/xCode/OpenGLMultigame/OpenGLMultigame/OpenGLMultigame/Box2D/**",
+				);
 				INFOPLIST_FILE = OpenGLMultigame/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = "/Users/Spencer/Documents/xCode/OpenGLMultigame/OpenGLMultigame/OpenGLMultigame/Box2D/**";
+				LIBRARY_SEARCH_PATHS = (
+					"/Users/Spencer/Documents/xCode/OpenGLMultigame/OpenGLMultigame/OpenGLMultigame/Box2D/**",
+					"/Users/a00924319/Desktop/openglmultigame/OpenGLMultigame/OpenGLMultigame/**",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = ca.hs.OpenGLMultigame;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

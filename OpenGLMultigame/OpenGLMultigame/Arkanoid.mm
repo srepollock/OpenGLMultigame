@@ -78,8 +78,8 @@ public:
     
     // GL-specific variables
     // You will need to set up 2 vertex arrays (for brick and ball)
-    GLuint brickVertexArray, ballVertexArray;
-    int numBrickVerts, numBallVerts;
+    GLuint brickVertexArray, ballVertexArray, brickVertexArray2, ballVertexArray2, brickVertexArray3, ballVertexArray3;
+    int numBrickVerts, numBallVerts, numBrickVerts2, numBallVerts2, numBrickVerts3, numBallVerts3;
     GLKMatrix4 modelViewProjectionMatrix;
     
     // You will also need some extra variables here
@@ -214,6 +214,7 @@ public:
     
     if (theBrick)
     {
+#pragma mark - First Block
         glGenVertexArraysOES(1, &brickVertexArray);
         glBindVertexArrayOES(brickVertexArray);
         
@@ -260,6 +261,108 @@ public:
         }
         glBindBuffer(GL_ARRAY_BUFFER, vertexBuffers[1]);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertCol), vertCol, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(VertexAttribColor);
+        glVertexAttribPointer(VertexAttribColor, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), BUFFER_OFFSET(0));
+        
+        glBindVertexArrayOES(0);
+#pragma mark - Second Block
+        glGenVertexArraysOES(1, &brickVertexArray2);
+        glBindVertexArrayOES(brickVertexArray2);
+        
+        GLuint vertexBuffers2[2];
+        glGenBuffers(2, vertexBuffers2);
+        glBindBuffer(GL_ARRAY_BUFFER, vertexBuffers2[0]);
+        GLfloat vertPos2[18];
+        k = 0;
+        numBrickVerts2 = 0;
+        vertPos2[k++] = theBrick->GetPosition().x - BRICK_WIDTH/2;
+        vertPos2[k++] = theBrick->GetPosition().y + BRICK_HEIGHT/2;
+        vertPos2[k++] = 10;
+        numBrickVerts2++;
+        vertPos2[k++] = theBrick->GetPosition().x + BRICK_WIDTH/2;
+        vertPos2[k++] = theBrick->GetPosition().y + BRICK_HEIGHT/2;
+        vertPos2[k++] = 10;
+        numBrickVerts2++;
+        vertPos2[k++] = theBrick->GetPosition().x + BRICK_WIDTH/2;
+        vertPos2[k++] = theBrick->GetPosition().y - BRICK_HEIGHT/2;
+        vertPos2[k++] = 10;
+        numBrickVerts2++;
+        vertPos2[k++] = theBrick->GetPosition().x - BRICK_WIDTH/2;
+        vertPos2[k++] = theBrick->GetPosition().y + BRICK_HEIGHT/2;
+        vertPos2[k++] = 10;
+        numBrickVerts2++;
+        vertPos2[k++] = theBrick->GetPosition().x + BRICK_WIDTH/2;
+        vertPos2[k++] = theBrick->GetPosition().y - BRICK_HEIGHT/2;
+        vertPos2[k++] = 10;
+        numBrickVerts2++;
+        vertPos2[k++] = theBrick->GetPosition().x - BRICK_WIDTH/2;
+        vertPos2[k++] = theBrick->GetPosition().y - BRICK_HEIGHT/2;
+        vertPos2[k++] = 10;
+        numBrickVerts2++;
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertPos2), vertPos2, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(VertexAttribPosition);
+        glVertexAttribPointer(VertexAttribPosition, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), BUFFER_OFFSET(0));
+        
+        GLfloat vertCol2[numBrickVerts2*3];
+        for (k=0; k<numBrickVerts2*3; k+=3)
+        {
+            vertCol2[k] = 1.0f;
+            vertCol2[k+1] = 0.0f;
+            vertCol2[k+2] = 0.0f;
+        }
+        glBindBuffer(GL_ARRAY_BUFFER, vertexBuffers2[1]);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertCol2), vertCol2, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(VertexAttribColor);
+        glVertexAttribPointer(VertexAttribColor, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), BUFFER_OFFSET(0));
+        
+        glBindVertexArrayOES(0);
+#pragma mark - Third Block
+        glGenVertexArraysOES(1, &brickVertexArray3);
+        glBindVertexArrayOES(brickVertexArray3);
+        
+        GLuint vertexBuffers3[2];
+        glGenBuffers(2, vertexBuffers3);
+        glBindBuffer(GL_ARRAY_BUFFER, vertexBuffers3[0]);
+        GLfloat vertPos3[18];
+        k = 0;
+        numBrickVerts3 = 0;
+        vertPos3[k++] = theBrick->GetPosition().x - BRICK_WIDTH/2;
+        vertPos3[k++] = theBrick->GetPosition().y + BRICK_HEIGHT/2;
+        vertPos3[k++] = 10;
+        numBrickVerts3++;
+        vertPos3[k++] = theBrick->GetPosition().x + BRICK_WIDTH/2;
+        vertPos3[k++] = theBrick->GetPosition().y + BRICK_HEIGHT/2;
+        vertPos3[k++] = 10;
+        numBrickVerts3++;
+        vertPos3[k++] = theBrick->GetPosition().x + BRICK_WIDTH/2;
+        vertPos3[k++] = theBrick->GetPosition().y - BRICK_HEIGHT/2;
+        vertPos3[k++] = 10;
+        numBrickVerts3++;
+        vertPos3[k++] = theBrick->GetPosition().x - BRICK_WIDTH/2;
+        vertPos3[k++] = theBrick->GetPosition().y + BRICK_HEIGHT/2;
+        vertPos3[k++] = 10;
+        numBrickVerts3++;
+        vertPos3[k++] = theBrick->GetPosition().x + BRICK_WIDTH/2;
+        vertPos3[k++] = theBrick->GetPosition().y - BRICK_HEIGHT/2;
+        vertPos3[k++] = 10;
+        numBrickVerts3++;
+        vertPos3[k++] = theBrick->GetPosition().x - BRICK_WIDTH/2;
+        vertPos3[k++] = theBrick->GetPosition().y - BRICK_HEIGHT/2;
+        vertPos3[k++] = 10;
+        numBrickVerts3++;
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertPos3), vertPos3, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(VertexAttribPosition);
+        glVertexAttribPointer(VertexAttribPosition, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), BUFFER_OFFSET(0));
+        
+        GLfloat vertCol3[numBrickVerts3*3];
+        for (k=0; k<numBrickVerts3*3; k+=3)
+        {
+            vertCol3[k] = 1.0f;
+            vertCol3[k+1] = 0.0f;
+            vertCol3[k+2] = 0.0f;
+        }
+        glBindBuffer(GL_ARRAY_BUFFER, vertexBuffers3[1]);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertCol3), vertCol3, GL_STATIC_DRAW);
         glEnableVertexAttribArray(VertexAttribColor);
         glVertexAttribPointer(VertexAttribColor, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), BUFFER_OFFSET(0));
         
@@ -338,9 +441,18 @@ public:
     if (theBrick && numBrickVerts > 0)
         glDrawArrays(GL_TRIANGLES, 0, numBrickVerts);
     
+    glBindVertexArrayOES(brickVertexArray2);
+    if (theBrick && numBrickVerts > 0)
+        glDrawArrays(GL_TRIANGLES, 0, numBrickVerts2);
+    
+    glBindVertexArrayOES(brickVertexArray3);
+    if (theBrick && numBrickVerts > 0)
+        glDrawArrays(GL_TRIANGLES, 0, numBrickVerts3);
+    
     glBindVertexArrayOES(ballVertexArray);
     if (theBall && numBallVerts > 0)
         glDrawArrays(GL_TRIANGLE_FAN, 0, numBallVerts);
+    glBindVertexArrayOES(0);
 }
 
 -(void)RegisterHit
