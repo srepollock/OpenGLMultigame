@@ -9,6 +9,7 @@
 #import "ArkanoidViewController.h"
 #import "Arkanoid.h"
 #import <OpenGLES/ES2/glext.h>
+#import "CText2D.h"
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
@@ -17,6 +18,7 @@
     GLint mvpMatUniform;
     
     Arkanoid *box2d;
+    CText2D *theHUD;
 }
 @property (strong, nonatomic) EAGLContext *context;
 
@@ -47,9 +49,15 @@
     view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
     
     [self setupGL];
-    
+#pragma mark - Box2D creation
     box2d = [[Arkanoid alloc] init];
     [box2d HelloWorld];
+#pragma mark - HUD creation
+    theHUD = [[CText2D alloc] init];
+    theHUD.pointSize = 10;
+    theHUD.dotsPerInch = 100;
+    [theHUD setTextLocation:CGPointMake(20, 50)];
+    [theHUD DrawText:@"Hello" inView:self.view withColor:GLKVector3Make(1, 0, 0)];
 }
 
 - (void)dealloc
@@ -106,6 +114,7 @@
     if ([box2d getBrickCount] <= 0 || [box2d getBallsLeft] <= 0) {
         [self.navigationController popViewControllerAnimated:YES];
     }
+    [theHUD DrawText:[NSString stringWithFormat:@"Ball Count: %d", [box2d getBrickCount]] inView:self.view withColor:GLKVector3Make(1, 0, 0)];
 }
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect

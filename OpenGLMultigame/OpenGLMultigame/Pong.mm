@@ -10,6 +10,7 @@
 #include "Pong.h"
 #include <OpenGLES/ES2/glext.h>
 #include <stdio.h>
+#include "CText2D.h"
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 //#define LOG_TO_CONSOLE
@@ -62,14 +63,9 @@ public:
             Pong *parentObj = (__bridge Pong *)(bodyA->GetUserData());
             // Call RegisterHit (assume CBox2D object is in user data)
             
-            
-            
             if (bodyA->GetPosition().y < 300) {
                 NSLog(@"Collision");
-//                if ((bodyA->GetPosition().x < PADDLE_POS_X + 50) && (bodyA->GetPosition().x > PADDLE_POS_X - 50)) {
-//                    // OK hit paddle
                     [parentObj PaddleHit];
-//                }
             } else {
                  [parentObj RegisterHit];
             }
@@ -106,6 +102,7 @@ public:
     bool ballLaunched;
     bool restartLaunch;
     float totalElapsedTime;
+    int player1Score, player2Score;
 }
 @end
 
@@ -189,6 +186,7 @@ public:
     ballHitBrick3 = false;
     ballLaunched = false;
     restartLaunch = true; // initially
+    player1Score = player2Score = 0;
     
     theBrick->SetLinearVelocity(b2Vec2(10000 , 0));
 
@@ -244,7 +242,6 @@ public:
     if (theBall->GetPosition().y > 565) {
         theBall->SetLinearVelocity(b2Vec2(theBall->GetLinearVelocity().x + randy, -BALL_VELOCITY));
         NSLog(@"Applying impulse %f to ball\n", BALL_VELOCITY);
-        
     }
 
     // If the last collision test was positive,
@@ -275,9 +272,13 @@ public:
         theBall->SetAngularVelocity(0);
         ballHitPaddle = false;
     }
-    
-    if (theBall->GetPosition().y > SCREEN_HEIGHT || theBall->GetPosition().y < 0) {
+#pragma mark - Scoring
+    if (theBall->GetPosition().y > SCREEN_HEIGHT) {
         [self resetBallPos];
+        player2Score++;
+    }else if (theBall->GetPosition().y < 0) {
+        [self resetBallPos];
+        player1Score++;
     }
     
     if (world)
@@ -677,6 +678,15 @@ public:
     if (paddlex + thePaddle->GetPosition().x > 750) {
         thePaddle->SetTransform(b2Vec2(750, thePaddle->GetPosition().y), 0);
     }
+}
+
+-(int)  getPlayerScore:(int)x {
+    if (x == 1) {
+        return player1Score;
+    }else if (x == 2) {
+        return player2Score;
+    }
+    return 0;
 }
 
 -(void)HelloWorld

@@ -9,6 +9,7 @@
 #import "PongViewController.h"
 #import "Pong.h"
 #import <OpenGLES/ES2/glext.h>
+#import "CText2D.h"
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
@@ -17,6 +18,7 @@
     GLint mvpMatUniform;
     
     Pong *box2d;
+    CText2D *theHUD, *theHUD2;
 }
 @property (strong, nonatomic) EAGLContext *context;
 
@@ -50,6 +52,17 @@
     
     box2d = [[Pong alloc] init];
     [box2d HelloWorld];
+#pragma mark - HUD creation
+    theHUD = [[CText2D alloc] init];
+    theHUD.pointSize = 10;
+    theHUD.dotsPerInch = 100;
+    [theHUD setTextLocation:CGPointMake(20, 50)];
+    [theHUD DrawText:@"Hello" inView:self.view withColor:GLKVector3Make(1, 0, 0)];
+    theHUD2 = [[CText2D alloc] init];
+    theHUD2.pointSize = 10;
+    theHUD2.dotsPerInch = 100;
+    [theHUD2 setTextLocation:CGPointMake(20, 550)];
+    [theHUD2 DrawText:@"Hello" inView:self.view withColor:GLKVector3Make(1, 0, 0)];
 }
 
 - (void)dealloc
@@ -103,6 +116,8 @@
 - (void)update
 {
     [box2d Update:self.timeSinceLastUpdate];
+    [theHUD DrawText:[NSString stringWithFormat:@"Score: %d", [box2d getPlayerScore:1]] inView:self.view withColor:GLKVector3Make(1, 0, 0)];
+    [theHUD2 DrawText:[NSString stringWithFormat:@"Score: %d", [box2d getPlayerScore:2]] inView:self.view withColor:GLKVector3Make(1, 0, 0)];
 }
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
